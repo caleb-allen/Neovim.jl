@@ -24,7 +24,7 @@ if !(get(ENV, "JULIA_REGISTRYCI_AUTOMERGE", "") == "true")
 end
 
 # too inconvenient api to supply handler here?
-function nvim_connect(path::String, args...)
+function nvim_connect(path::Union{String, Int}, args...)
     s = connect(path)
     NvimClient(s, s, args...)
 end

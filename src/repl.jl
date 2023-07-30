@@ -5,17 +5,19 @@
 # For the moment, the first keypress after going to insert mode disappears sometimes.
 import REPL
 import REPL.LineEdit
+import Base.AnyDict
 
 include("Neovim.jl")
 
 mutable struct NvimReplState
     active::Bool
     nv::Neovim.NvimClient
+    proc
     s::LineEdit.MIState
     rbuf::IOBuffer
     function NvimReplState()
         state = new(false)
-        state.nv = Neovim.nvim_spawn(state)
+        state.nv, state.proc = Neovim.nvim_spawn(state)
         state
     end
 end
@@ -40,12 +42,13 @@ Neovim.command(rstate.nv, "au InsertEnter * call rpcnotify($channel, 'insert')")
 Neovim.command(rstate.nv, "set ft=julia")
 
 
-const nvim_keymap = Dict(
+const nvim_keymap = AnyDict(
     "^O" => function (s,repl,c)
         ps = LineEdit.state(s, LineEdit.mode(s))
         nvim_normal(ps.terminal,s,repl)
     end
 )
+
 
 function update_screen()
     if !rstate.active
@@ -73,7 +76,7 @@ function nvim_normal(term, s, repl)
     buf_pos = position(rbuf)
     seek(rbuf, 0)
     cur_col = buf_pos
-    lines = ByteString[]
+    lines = []
     more = true
     input(nv, "\033")
     cursor = [0,0]

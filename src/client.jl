@@ -109,3 +109,7 @@ function on_request(::DummyHandler, c, serial, name, args)
     reply_error(c, serial, "Client cannot handle request, please override `on_request`")
 end
 
+function Base.write(c::NvimClient)
+
+end
+
